@@ -735,9 +735,17 @@ export class SocialLoginWeb extends WebPlugin implements SocialLoginPlugin {
       };
 
       window.addEventListener('message', handleMessage);
-
+      const popupCloseChecker = setInterval(() => {
+        if (popup.closed) {
+            clearInterval(popupCloseChecker);
+            window.removeEventListener('message', handleMessage);
+            reject(new Error('User closed the login window'));
+        }
+    }, 500);
       // Timeout after 5 minutes
       setTimeout(() => {
+        clearInterval(popupCloseChecker);
+
         window.removeEventListener('message', handleMessage);
         popup.close();
         reject(new Error('OAuth timeout'));
